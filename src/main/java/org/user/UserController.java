@@ -53,6 +53,11 @@ public class UserController extends Controller {
         User user = userService.getByUserTel(getPara("phone"));
         if(StrKit.notNull(user)){
             renderJson(BaseResult.fail("该手机号已被注册！"));
+            return;
+        }
+        user = userService.getByUserNo(getPara("user_no"));
+        if(StrKit.notNull(user)){
+            renderJson(BaseResult.fail("该学号已被注册"));
         }
         else{
             user = new User();

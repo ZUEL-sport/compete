@@ -1,12 +1,15 @@
 package org.game;
 
 import cn.fabrice.common.pojo.BaseResult;
+import cn.fabrice.jfinal.annotation.Param;
 import cn.fabrice.jfinal.annotation.ValidateParam;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
+import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Record;
 import org.common.interceptor.CorsInterceptor;
+import org.common.module.Game;
 
 import java.util.List;
 
@@ -31,6 +34,20 @@ public class GameController extends Controller {
         else{
             renderJson(list);
         }
-        return;
+    }
+
+    /**
+     * 查看项目详情
+     * 从数据库中取出指定项目的详情
+     */
+    @Param(name = "game_no",required = true)
+    public void gameDetail(){
+        Record record = gameService.gameDetail(getPara("game_no"));
+        if(record != null){
+            renderJson(record);
+        }
+        else{
+            renderJson(BaseResult.fail("未查询到比赛信息"));
+        }
     }
 }
