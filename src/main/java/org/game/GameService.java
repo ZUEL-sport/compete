@@ -25,4 +25,15 @@ public class GameService extends BaseService<Game> {
         SqlPara sqlPara= Db.getSqlPara("game.listByNoProcess",cond);
         return Db.find(sqlPara);
     }
+
+    /**
+     * 查找比赛编号为gameNo的比赛详细信息
+     * @param gameNo
+     * @return
+     */
+    public Record gameDetail(String gameNo){
+        Kv cond = Kv.by("game_no",gameNo);
+        SqlPara sqlPara = Db.getSqlPara("game.gameDetail",cond);
+        return Db.findFirst(sqlPara);
+    }
 };

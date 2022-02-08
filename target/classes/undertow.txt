@@ -1,7 +1,6 @@
 # 配置 undertow
 
 undertow.devMode=true
-undertow.host= 127.0.0.1
 undertow.host=localhost
 undertow.port=8081
 undertow.hotSwapClassPrefix=cn.fabrice.,net.dreamlu.
