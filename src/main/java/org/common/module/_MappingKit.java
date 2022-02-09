@@ -17,6 +17,7 @@ public class _MappingKit {
 	
 	public static void mapping(ActiveRecordPlugin arp) {
 		arp.addMapping("complaint", "id", Complaint.class);
+		arp.addMapping("cookie", "id", Cookie.class);
 		arp.addMapping("enroll", "id", Enroll.class);
 		arp.addMapping("game", "id", Game.class);
 		arp.addMapping("game_turn", "id", GameTurn.class);

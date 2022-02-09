@@ -7,8 +7,15 @@ import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Record;
 import org.common.interceptor.CorsInterceptor;
+import org.common.module.Cookie;
 import org.common.module.User;
+
+import java.math.BigInteger;
+import java.util.List;
+
+import static org.settings.Setting.COOKIE_LIFE;
 
 /**
  * 具体用户接参响应方法
@@ -21,6 +28,7 @@ import org.common.module.User;
 public class UserController extends Controller {
     @Inject
     UserService userService;
+
     /**
      * 登录响应
      * 学号+密码实现登录
@@ -35,11 +43,16 @@ public class UserController extends Controller {
         }
         if(!getPara("password").equals(user.getPassword())){
             renderJson(BaseResult.fail("密码错误"));
-            return;
         }
         else{
+            Cookie cookie = new Cookie();
+            cookie.setAccessToken("登录");
+            cookie.setExpiresIn(BigInteger.valueOf(COOKIE_LIFE));
+            cookie.setExpiresTime(BigInteger.valueOf(COOKIE_LIFE + System.currentTimeMillis()));
+            cookie.setUuno(getPara("user_no"));
+            cookie.save();
+            setCookie("user_no",user.getUserNo(),(int)COOKIE_LIFE,true);
             renderJson(BaseResult.ok("用户登录成功"));
-            return;
         }
     }
 
@@ -68,6 +81,44 @@ public class UserController extends Controller {
             user.setPhone(getPara("phone"));
             user.setSex("男".equals(getPara("sex")) ?0:1);
             renderJson(user.save()?BaseResult.ok("注册成功！"):BaseResult.fail("注册失败"));
+        }
+    }
+
+    public void resetPassword(){//说实话虽然我改了cookie，但是我没看懂这个函数在干什么，请再返工打磨一下
+//        User user = userService.getByUserNo(getPara("user_no"));
+        User user = userService.getByUserNo(getCookie("user_no"));
+        if(getCookie("user_no").equals(user.getUserNo())){
+            user.setPassword(getPara("password"));
+            user.update();
+        }
+        renderJson(BaseResult.ok("重置密码成功"));
+    }
+
+    /**
+     * 查询个人信息
+     * cookie中对应用户的个人信息
+     */
+    public void getUser(){
+        Record record = userService.getUserRecByUserNo(getCookie("user_no"));
+        if(StrKit.notNull(record)){
+            renderJson(record);
+        }
+        else {
+            renderJson(BaseResult.fail("未查询到个人信息"));
+        }
+    }
+
+    /**
+     * 查询团队信息
+     * cookie中对应用户的团队信息
+     */
+    public void getTeamByUserNo(){
+        List<Record> records = userService.getTeamRecByUserNo(getCookie("user_no"));
+        if(StrKit.notNull(records) && records.size() > 0){
+            renderJson(records);
+        }
+        else {
+            renderJson(BaseResult.fail("您当前未加入任何队伍"));
         }
     }
 }

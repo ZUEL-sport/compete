@@ -50,4 +50,16 @@ public class GameController extends Controller {
             renderJson(BaseResult.fail("未查询到比赛信息"));
         }
     }
+
+    public void listGameResults(){
+
+        List<Record> list= gameService.listByGrade(getPara("game_no"),getPara("turn_no"));
+        if(list==null){
+            renderJson(BaseResult.fail("当前暂无比赛结果"));
+        }
+        else{
+            renderJson(list);
+        }
+        return;
+    }
 }

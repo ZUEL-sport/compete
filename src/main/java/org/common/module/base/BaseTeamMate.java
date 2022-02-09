@@ -10,98 +10,98 @@ import com.jfinal.plugin.activerecord.IBean;
 public abstract class BaseTeamMate<M extends BaseTeamMate<M>> extends Model<M> implements IBean {
 
 	/**
-	 * 主键;主键唯一标识
+	 * 主键 主键唯一标识
 	 */
 	public void setId(java.math.BigInteger id) {
 		set("id", id);
 	}
 	
 	/**
-	 * 主键;主键唯一标识
+	 * 主键 主键唯一标识
 	 */
 	public java.math.BigInteger getId() {
 		return get("id");
 	}
 	
 	/**
-	 * 创建时间;创建时间
+	 * 创建时间 创建时间
 	 */
 	public void setCreatedTime(java.util.Date createdTime) {
 		set("created_time", createdTime);
 	}
 	
 	/**
-	 * 创建时间;创建时间
+	 * 创建时间 创建时间
 	 */
 	public java.util.Date getCreatedTime() {
 		return get("created_time");
 	}
 	
 	/**
-	 * 更新时间;更新时间
+	 * 更新时间 更新时间
 	 */
 	public void setUpdatedTime(java.util.Date updatedTime) {
 		set("updated_time", updatedTime);
 	}
 	
 	/**
-	 * 更新时间;更新时间
+	 * 更新时间 更新时间
 	 */
 	public java.util.Date getUpdatedTime() {
 		return get("updated_time");
 	}
 	
 	/**
-	 * 是否删除;0-未删除;1-已删除
+	 * 是否删除 0-未删除;1-已删除
 	 */
 	public void setIsDeleted(java.lang.Integer isDeleted) {
 		set("is_deleted", isDeleted);
 	}
 	
 	/**
-	 * 是否删除;0-未删除;1-已删除
+	 * 是否删除 0-未删除;1-已删除
 	 */
 	public java.lang.Integer getIsDeleted() {
 		return getInt("is_deleted");
 	}
 	
 	/**
-	 * 团队编号;团队的编号
+	 * 团队编号 团队的编号
 	 */
 	public void setTeamNo(java.lang.String teamNo) {
 		set("team_no", teamNo);
 	}
 	
 	/**
-	 * 团队编号;团队的编号
+	 * 团队编号 团队的编号
 	 */
 	public java.lang.String getTeamNo() {
 		return getStr("team_no");
 	}
 	
 	/**
-	 * 成员学号;团队成员的学号
+	 * 成员学号 团队成员的学号
 	 */
 	public void setMateNo(java.lang.String mateNo) {
 		set("mate_no", mateNo);
 	}
 	
 	/**
-	 * 成员学号;团队成员的学号
+	 * 成员学号 团队成员的学号
 	 */
 	public java.lang.String getMateNo() {
 		return getStr("mate_no");
 	}
 	
 	/**
-	 * 身份;0-队员,1-队长
+	 * 身份 0-队员,1-队长
 	 */
 	public void setRanks(java.lang.Integer ranks) {
 		set("ranks", ranks);
 	}
 	
 	/**
-	 * 身份;0-队员,1-队长
+	 * 身份 0-队员,1-队长
 	 */
 	public java.lang.Integer getRanks() {
 		return getInt("ranks");
