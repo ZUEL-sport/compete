@@ -70,4 +70,17 @@ public class UserController extends Controller {
             renderJson(user.save()?BaseResult.ok("注册成功！"):BaseResult.fail("注册失败"));
         }
     }
+
+
+    public void resetPassword(){
+
+        User user = userService.getByUserNo(getPara("user_no"));
+
+        if(getPara("user_no").equals(user.getUserNo())){
+            user.setPassword(getPara("password"));
+            user.update();
+        }
+        renderJson(BaseResult.ok("重置密码成功"));
+        return;
+    }
 }

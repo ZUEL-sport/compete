@@ -36,4 +36,10 @@ public class GameService extends BaseService<Game> {
         SqlPara sqlPara = Db.getSqlPara("game.gameDetail",cond);
         return Db.findFirst(sqlPara);
     }
+
+    public List<Record> listByGrade(String game_no,String turn_no){
+        Kv cond=Kv.by("game_no",game_no).set("turn_no",turn_no);
+        SqlPara sqlPara= Db.getSqlPara("game.listByGrade",cond);
+        return Db.find(sqlPara);
+    }
 };
