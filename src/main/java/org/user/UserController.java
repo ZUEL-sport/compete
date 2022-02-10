@@ -11,6 +11,7 @@ import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Record;
 import org.common.interceptor.CorsInterceptor;
 import org.common.module.Game;
+import org.common.module.TeamMate;
 import org.common.module.User;
 import org.game.GameService;
 
@@ -217,5 +218,84 @@ public class UserController extends Controller {
         map.put("grade",gradeResult);
         renderJson(map);
         return;
+    }
+
+    /**
+     * 团队管理---添加团队成员
+     * (1)在我的团队界面显示团队
+     * (2)点击进入各个团队,其中自己身份为队长的团队处可以点击进行团队成员管理
+     * (3)此时团队编号由点击跳转事件传入成员管理界面
+     * (4)输入成员学号,将成员添加进入团队
+     */
+    @Param(name = "member_no",required = true)
+    @Param(name = "team_no",required = true)
+    public void addMember(){
+        TeamMate teamMate=new TeamMate();
+        User user=userService.getByUserNo(getPara("member_no"));
+        if(user==null){
+            renderJson(BaseResult.fail("当前成员不存在!"));
+            return;
+        }
+        if(userService.selectMember(getPara("member_no"),getPara("team_no"))){
+            renderJson(BaseResult.fail("当前成员已在团队中!"));
+            return;
+        }
+        else{
+            teamMate.setMateNo(getPara("member_no"));
+            teamMate.setTeamNo(getPara("team_no"));
+            teamMate.setRanks(0);
+            renderJson(teamMate.save()?BaseResult.ok("添加成功！"):BaseResult.fail("添加失败"));
+        }
+    }
+
+    /**
+     * 团队管理---删除团队成员
+     * (1)在我的团队界面显示团队
+     * (2)点击进入各个团队,其中自己身份为队长的团队处可以点击进行团队成员管理
+     * (3)此时团队编号由点击跳转事件传入成员管理界面
+     * (4)输入成员学号,将成员从团队中删除(is_deleted置为1)
+     */
+    @Param(name = "member_no",required = true)
+    @Param(name = "team_no",required = true)
+    public void deleteMember(){
+        User user=userService.getByUserNo(getPara("member_no"));
+        if(user==null){
+            renderJson(BaseResult.fail("当前成员不存在!"));
+            return;
+        }
+        if(!userService.selectMember(getPara("member_no"),getPara("team_no"))){
+            renderJson(BaseResult.fail("当前成员不在团队中!"));
+            return;
+        }
+
+        else{
+            if(userService.deleteMember(getPara("member_no"),getPara("team_no"))>0){
+                renderJson(BaseResult.ok("删除成功！"));
+            }
+            else{
+                renderJson(BaseResult.fail("删除失败!"));
+            }
+        }
+    }
+
+    /**
+     * 团队管理---解散团队
+     * (1)在我的团队界面显示团队
+     * (2)点击进入各个团队,其中自己身份为队长的团队处可以点击进行团队成员管理
+     * (3)此时团队编号由点击跳转事件传入成员管理界面
+     * (4)根据团队编号将团队从团队表中删除,同时删除该团队的成员
+     */
+    @Param(name = "team_no",required = true)
+    public void deleteTeam(){
+        if(userService.deleteTeam(getPara("team_no"))>0){
+            List<Record> member= userService.findMember(getPara("team_no"));
+            for(Record record:member){
+                userService.deleteMember(record.getStr("mate_no"),getPara("team_no"));
+            }
+            renderJson(BaseResult.ok("删除成功！"));
+        }
+        else{
+            renderJson(BaseResult.fail("删除失败!"));
+        }
     }
 }

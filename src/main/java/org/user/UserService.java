@@ -8,6 +8,7 @@ import com.jfinal.plugin.activerecord.SqlPara;
 import org.common.module.User;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 用户基础功能
@@ -47,6 +48,57 @@ public class UserService  extends BaseService<User> {
         Kv cond = Kv.by("user_no",no);
         SqlPara sqlPara= Db.getSqlPara("user.getByUserNo",cond);
         return Db.findFirst(sqlPara);
+    }
+
+    /***
+     *查找成员member_no是否在team_no团队中,如果是,返回true,否则返回false
+     * @param member_no
+     * @return
+     */
+    public boolean selectMember(String member_no,String team_no){
+        Kv cond = Kv.by("team_no",team_no);
+        SqlPara sqlPara= Db.getSqlPara("user.selectMember",cond);
+        List<Record> member=Db.find(sqlPara);
+        for(Record record:member){
+            /*说明该成员已经在team_no团队中*/
+            if(Objects.equals(record.getStr("mate_no"), member_no)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /***
+     *查找team_no中的所有成员
+     * @param team_no
+     * @return
+     */
+    public List<Record> findMember(String team_no){
+        Kv cond = Kv.by("team_no",team_no);
+        SqlPara sqlPara= Db.getSqlPara("user.selectMember",cond);
+        return Db.find(sqlPara);
+    }
+
+    /***
+     *根据member_no和team_no查找团队成员的记录,将is_deleted置为1
+     * @param member_no
+     * @return
+     */
+    public int deleteMember(String member_no,String team_no){
+        Kv cond = Kv.by("member_no",member_no).set("team_no",team_no);
+        SqlPara sqlPara= Db.getSqlPara("user.deleteMember",cond);
+        return Db.update(sqlPara);
+    }
+
+    /***
+     *根据team_no在团队表中查找团队记录,将is_deleted置为1
+     * @param team_no
+     * @return
+     */
+    public int deleteTeam(String team_no){
+        Kv cond = Kv.by("team_no",team_no);
+        SqlPara sqlPara= Db.getSqlPara("user.deleteTeam",cond);
+        return Db.update(sqlPara);
     }
 }
 

@@ -23,10 +23,6 @@ select * from grade where no = #para(no) and is_deleted=0 and grade is not null 
 #end
 
 #sql("listByGrade")
-select *
-from grade
-where grade.game_no = #para(game_no)
-  and grade.turn_no = #para(turn_no)
-  and is_deleted=0
-    #end
+select * from grade where grade.game_no = #para(game_no) and grade.turn_no = #para(turn_no) and is_deleted=0
+#end
 
