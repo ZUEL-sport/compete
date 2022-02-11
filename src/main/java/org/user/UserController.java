@@ -94,52 +94,63 @@ public class UserController extends Controller {
     }
 
     /**
-     * 我的项目(待比赛)
-     * 根据编号(no)从成绩表中找到game_no+turn_no
+     * 我的项目(待比赛--grade中成绩为null)
+     * 根据编号(no)联表查询得到参赛者(名字),项目名称,场次名称,比赛时间,比赛场地
      * (1)个人项目:从主页传来的user_no
      * (2)团队项目:根据user_no得到的team_no
+     *
+     * 在数据库查询时直接联表查询获得所有需要的数据,比在逻辑层面再去筛选存数据更为简便
+     * 原方法(毕竟是自己绞尽脑汁想的,还是记录一下):
+     * Record user = userService.getPeople(getPara("user_no"));
+     * List<Record> myGame= gameService.getMyGame(getPara("user_no"));
+     * List<Record> myTeam = userService.myTeam(getPara("user_no"));
+     * for(Record record:myTeam){
+     * myGame.addAll(gameService.getMyGame(record.getStr("team_no")));
+     * }
+     * //参赛者
+     * List<Record> peopleResult = new ArrayList<Record>();
+     * //项目名称
+     * List<Record> gameResult = new ArrayList<Record>();
+     * //场次名称
+     * List<Record> turnResult = new ArrayList<Record>();
+     * //遍历将myGame中的game_no和turn_no对应的game和turn传到前端,前端取出其中的项目名称+场次名称+比赛时间+比赛场地
+     * for(Record record:myGame){
+     * //三条列表:参赛者+项目+场次
+     * if (Objects.equals(record.getStr("no"), getPara("user_no"))) {
+     * //说明该记录为个人参赛
+     * peopleResult.add(user);
+     * }
+     * else{
+     * //否则该记录为团队参赛,传入团队信息
+     * peopleResult.add(gameService.getTeam(record.getStr("no")));
+     * }
+     * Record game = gameService.getGame(record.getStr("game_no"));
+     * Record turn = gameService.getTurn(record.getStr("turn_no"));
+     * gameResult.add(game);
+     * turnResult.add(turn);
+     * }
+     * Map<String, List<Record>> map = new HashMap<String, List<Record>>();
+     * //将list存入map,再renderJson(map)
+     * map.put("people",peopleResult);
+     * map.put("game",gameResult);
+     * map.put("turn",turnResult);
+     * renderJson(map);
+     * return;
+     *
+     * 在数据库查询时即获得所需结果显然更为简便
      */
     @Param(name = "user_no",required = true)
     public void myGame(){
-        /*myGame列表中有三个属性:参赛者编号,项目编号,场次编号*/
-        /*(1)个人项目*/
+        //个人项目
         Record user = userService.getPeople(getPara("user_no"));
         List<Record> myGame= gameService.getMyGame(getPara("user_no"));
-        /*(2)团队项目:根据编号查找所属团队*/
+        //团队项目
         List<Record> myTeam= userService.myTeam(getPara("user_no"));
         /*遍历根据myTeam中的team_no获取参赛信息,将参赛信息存入myGame*/
         for(Record record:myTeam){
-            myGame.addAll(gameService.getMyGame(record.getStr("team_no")));
+            myGame.addAll(gameService.getTeamGame(record.getStr("team_no")));
         }
-        //参赛者
-        List<Record> peopleResult=new ArrayList<Record>();
-        //项目名称
-        List<Record> gameResult = new ArrayList<Record>();
-        //场次名称
-        List<Record> turnResult = new ArrayList<Record>();
-        /*遍历将myGame中的game_no和turn_no对应的game和turn传到前端,前端取出其中的项目名称+场次名称+比赛时间+比赛场地*/
-        for(Record record:myGame){
-            /*三条列表:参赛者+项目+场次*/
-            if(Objects.equals(record.getStr("no"), getPara("user_no"))){
-                /*说明该记录为个人参赛*/
-                peopleResult.add(user);
-            }
-            else{
-                /*否则该记录为团队参赛,传入团队信息*/
-                peopleResult.add(gameService.getTeam(record.getStr("no")));
-            }
-            Record game=gameService.getGame(record.getStr("game_no"));
-            Record turn=gameService.getTurn(record.getStr("turn_no"));
-            gameResult.add(game);
-            turnResult.add(turn);
-        }
-        /*根据学号传递参赛信息*/
-        Map<String,List<Record>> map=new HashMap<String,List<Record>>();
-        /*将list存入map,再renderJson(map)*/
-        map.put("people",peopleResult);
-        map.put("game",gameResult);
-        map.put("turn",turnResult);
-        renderJson(map);
+        renderJson(myGame);
         return;
     }
 
@@ -152,30 +163,7 @@ public class UserController extends Controller {
         User user = userService.getByUserNo(getPara("user_no"));
         /*有成绩的参赛信息*/
         List<Record> myGame= gameService.getMyGrade(user.getUserNo());
-        //姓名
-        List<Record> peopleResult=new ArrayList<Record>();
-        //项目名称
-        List<Record> gameResult = new ArrayList<Record>();
-        //场次名称
-        List<Record> turnResult = new ArrayList<Record>();
-        //成绩
-        List<Record> gradeResult = new ArrayList<Record>();
-        for(Record record:myGame){
-            Record game=gameService.getGame(record.getStr("game_no"));
-            Record turn=gameService.getTurn(record.getStr("turn_no"));
-            peopleResult.add(user.toRecord());
-            gameResult.add(game);
-            turnResult.add(turn);
-            gradeResult.add(record);
-        }
-        /*根据学号传递参赛信息*/
-        Map<String,List<Record>> map=new HashMap<String,List<Record>>();
-        /*将list存入map,再renderJson(map)*/
-        map.put("people",peopleResult);
-        map.put("game",gameResult);
-        map.put("turn",turnResult);
-        map.put("grade",gradeResult);
-        renderJson(map);
+        renderJson(myGame);
         return;
     }
 
@@ -189,34 +177,9 @@ public class UserController extends Controller {
         List<Record> myGame= new ArrayList<Record>();
         /*遍历根据myTeam中的team_no获取成绩信息,将参赛信息存入myGame*/
         for(Record record:myTeam){
-            myGame.addAll(gameService.getMyGrade(record.getStr("team_no")));
+            myGame.addAll(gameService.getTeamGrade(record.getStr("team_no")));
         }
-        /*根据成绩信息中的no,game_no和team_no获取名称*/
-        //团队名
-        List<Record> peopleResult=new ArrayList<Record>();
-        //项目名称
-        List<Record> gameResult = new ArrayList<Record>();
-        //场次名称
-        List<Record> turnResult = new ArrayList<Record>();
-        //成绩
-        List<Record> gradeResult = new ArrayList<Record>();
-        for(Record record:myGame){
-            Record game=gameService.getGame(record.getStr("game_no"));
-            Record turn=gameService.getTurn(record.getStr("turn_no"));
-            Record team=gameService.getTeam(record.getStr("no"));
-            gameResult.add(game);
-            turnResult.add(turn);
-            peopleResult.add(team);
-            gradeResult.add(record);
-        }
-        /*参赛信息*/
-        Map<String,List<Record>> map=new HashMap<String,List<Record>>();
-        /*将list存入map,再renderJson(map)*/
-        map.put("people",peopleResult);
-        map.put("game",gameResult);
-        map.put("turn",turnResult);
-        map.put("grade",gradeResult);
-        renderJson(map);
+        renderJson(myGame);
         return;
     }
 

@@ -26,6 +26,17 @@ public class GameService extends BaseService<Game> {
         return Db.find(sqlPara);
     }
 
+    /***
+     * 查找比赛流程的名字是"name"的比赛
+     * @param name
+     * @return
+     */
+    public List<Record> listByProcess(String name){
+        Kv cond=Kv.by("name",name);
+        SqlPara sqlPara= Db.getSqlPara("game.listByProcess",cond);
+        return Db.find(sqlPara);
+    }
+
     /**
      * 根据game_no获取game信息
      * @param game_no
@@ -66,24 +77,79 @@ public class GameService extends BaseService<Game> {
     }
 
     /***
-     * 在成绩表中查找game_no和turn_no
-     * @param no
+     * 在成绩表中查找参赛者(个人),项目名称,场次名称,比赛时间,比赛场地
+     * @param user_no
      * @return
      */
-    public List<Record> getMyGame(String no){
-        Kv cond = Kv.by("no",no);
+    public List<Record> getMyGame(String user_no){
+        Kv cond = Kv.by("user_no",user_no);
         SqlPara sqlPara=Db.getSqlPara("game.getMyGame",cond);
         return Db.find(sqlPara);
     }
 
     /***
-     * 在成绩表中查找有成绩的game_no,turn_no,grade,ranking
-     * @param no
+     * 在成绩表中查找参赛者(团队),项目名称,场次名称,比赛时间,比赛场地
+     * @param team_no
      * @return
      */
-    public List<Record> getMyGrade(String no){
-        Kv cond = Kv.by("no",no);
+    public List<Record> getTeamGame(String team_no){
+        Kv cond = Kv.by("team_no",team_no);
+        SqlPara sqlPara=Db.getSqlPara("game.getTeamGame",cond);
+        return Db.find(sqlPara);
+    }
+
+
+    /***
+     * 在成绩表中查找有成绩的姓名,项目名称,场次名称,成绩,排名
+     * @param user_no
+     * @return
+     */
+    public List<Record> getMyGrade(String user_no){
+        Kv cond = Kv.by("user_no",user_no);
         SqlPara sqlPara=Db.getSqlPara("game.getMyGrade",cond);
         return Db.find(sqlPara);
+    }
+
+    /***
+     * 在成绩表中查找有成绩的团队名称,项目名称,场次名称,成绩,排名
+     * @param team_no
+     * @return
+     */
+    public List<Record> getTeamGrade(String team_no){
+        Kv cond = Kv.by("team_no",team_no);
+        SqlPara sqlPara=Db.getSqlPara("game.getTeamGrade",cond);
+        return Db.find(sqlPara);
+    }
+
+    /***
+     * 显示所有比赛的名字+当前流程名字
+     * @param
+     * @return
+     */
+    public List<Record> listGameProcess(){
+        SqlPara sqlPara= Db.getSqlPara("game.listGameProcess");
+        return Db.find(sqlPara);
+    }
+
+    /***
+     *根据team_no在项目表中查找记录,将process_no修改为新传入的process_no
+     * @param game_no
+     * @return
+     */
+    public int updateGameProcess(String game_no,String process_no){
+        Kv cond = Kv.by("game_no",game_no).set("process_no",process_no);
+        SqlPara sqlPara= Db.getSqlPara("game.updateGameProcess",cond);
+        return Db.update(sqlPara);
+    }
+
+    /***
+     * 修改成绩
+     * @param user_no
+     * @return
+     */
+    public int updateGrade(String user_no,String turn_no,double grade){
+        Kv cond = Kv.by("user_no",user_no).set("turn_no",turn_no).set("grade",grade);
+        SqlPara sqlPara= Db.getSqlPara("game.updateGrade",cond);
+        return Db.update(sqlPara);
     }
 };
