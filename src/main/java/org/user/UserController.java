@@ -1,6 +1,7 @@
 package org.user;
 
 import cn.fabrice.common.pojo.BaseResult;
+import cn.fabrice.common.pojo.DataResult;
 import cn.fabrice.jfinal.annotation.Param;
 import cn.fabrice.jfinal.annotation.ValidateParam;
 import com.alibaba.fastjson.JSONObject;
@@ -150,7 +151,7 @@ public class UserController extends Controller {
         for(Record record:myTeam){
             myGame.addAll(gameService.getTeamGame(record.getStr("team_no")));
         }
-        renderJson(myGame);
+        renderJson(DataResult.data(myGame));
         return;
     }
 
@@ -163,7 +164,7 @@ public class UserController extends Controller {
         User user = userService.getByUserNo(getPara("user_no"));
         /*有成绩的参赛信息*/
         List<Record> myGame= gameService.getMyGrade(user.getUserNo());
-        renderJson(myGame);
+        renderJson(DataResult.data(myGame));
         return;
     }
 
@@ -179,7 +180,7 @@ public class UserController extends Controller {
         for(Record record:myTeam){
             myGame.addAll(gameService.getTeamGrade(record.getStr("team_no")));
         }
-        renderJson(myGame);
+        renderJson(DataResult.data(myGame));
         return;
     }
 

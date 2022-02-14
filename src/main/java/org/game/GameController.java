@@ -1,6 +1,7 @@
 package org.game;
 
 import cn.fabrice.common.pojo.BaseResult;
+import cn.fabrice.common.pojo.DataResult;
 import cn.fabrice.jfinal.annotation.Param;
 import cn.fabrice.jfinal.annotation.ValidateParam;
 import com.jfinal.aop.Before;
@@ -37,7 +38,7 @@ public class GameController extends Controller {
             renderJson(BaseResult.fail("当前暂无比赛"));
         }
         else{
-            renderJson(list);
+            renderJson(DataResult.data(list));
         }
     }
 
@@ -49,7 +50,7 @@ public class GameController extends Controller {
     public void gameDetail(){
         Record record = gameService.getGame(getPara("game_no"));
         if(record != null){
-            renderJson(record);
+            renderJson(DataResult.data(record));
         }
         else{
             renderJson(BaseResult.fail("未查询到比赛信息"));
@@ -67,7 +68,7 @@ public class GameController extends Controller {
             renderJson(BaseResult.fail("当前暂无比赛结果"));
         }
         else{
-            renderJson(list);
+            renderJson(DataResult.data(list));
         }
         return;
     }
@@ -82,7 +83,7 @@ public class GameController extends Controller {
             renderJson(BaseResult.fail("当前暂无比赛"));
         }
         else{
-            renderJson(list);
+            renderJson(DataResult.data(list));
         }
     }
 
@@ -110,7 +111,7 @@ public class GameController extends Controller {
             renderJson(BaseResult.fail("当前暂无比赛"));
         }
         else{
-            renderJson(list);
+            renderJson(DataResult.data(list));
         }
     }
 
@@ -126,12 +127,12 @@ public class GameController extends Controller {
         if(game.getInt("type")==0){
             //0表示个人项目
             List<Record> list=gameService.getAllPeopleGame(game.getStr("now_turn_no"));
-            renderJson(list);
+            renderJson(DataResult.data(list));
         }
         else if(game.getInt("type")==1){
             //1表示团队项目
             List<Record> list=gameService.getAllTeamGame(game.getStr("now_turn_no"));
-            renderJson(list);
+            renderJson(DataResult.data(list));
         }
         else{
             renderJson(BaseResult.fail("晋级信息错误!"));
@@ -174,7 +175,7 @@ public class GameController extends Controller {
     public void findGrade(){
         User user = userService.getByUserNo(getPara("user_no"));
         List<Record> myGame= gameService.getMyGrade(user.getUserNo());
-        renderJson(myGame);
+        renderJson(DataResult.data(myGame));
         return;
     }
 
