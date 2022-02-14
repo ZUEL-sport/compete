@@ -30,6 +30,18 @@ from team,game,game_turn,grade where grade.no=team.team_no and grade.game_no=gam
     and team.team_no = #para(team_no) and grade.is_deleted=0 and grade is null and ranking is null
 #end
 
+#sql("getAllPeopleGame")
+select user.name as user_name,game.name as game_name,game_turn.name as turn_name,grade,ranking
+from user,game,game_turn,grade where grade.no=user.user_no and grade.game_no=game.game_no and grade.turn_no=game_turn.turn_no
+    and grade.turn_no = #para(turn_no) and grade.is_deleted=0 and grade is not null and ranking is not null
+#end
+
+#sql("getAllTeamGame")
+select team.name as team_name,game.name as game_name,game_turn.name as turn_name,grade,ranking
+from team,game,game_turn,grade where grade.no=team.team_no and grade.game_no=game.game_no and grade.turn_no=game_turn.turn_no
+    and grade.turn_no = #para(turn_no) and grade.is_deleted=0 and grade is not null and ranking is not null
+#end
+
 #sql("getMyGrade")
 /*为什么不能写成grade.grade,grade.ranking*/
 select user.name as user_name,game.name as game_name,game_turn.name as turn_name,grade,ranking

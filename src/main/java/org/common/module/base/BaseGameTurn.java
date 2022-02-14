@@ -80,14 +80,14 @@ public abstract class BaseGameTurn<M extends BaseGameTurn<M>> extends Model<M> i
 	}
 	
 	/**
-	 * 场次编号,作为场次的主键唯一存在
+	 * 场次编号 存储第几场
 	 */
 	public void setTurnNo(java.lang.String turnNo) {
 		set("turn_no", turnNo);
 	}
 	
 	/**
-	 * 场次编号,作为场次的主键唯一存在
+	 * 场次编号 存储第几场
 	 */
 	public java.lang.String getTurnNo() {
 		return getStr("turn_no");
@@ -147,6 +147,20 @@ public abstract class BaseGameTurn<M extends BaseGameTurn<M>> extends Model<M> i
 	 */
 	public java.lang.Integer getNum() {
 		return getInt("num");
+	}
+	
+	/**
+	 * 下个场次编号 表示该场次的下个场次,用于连接整个项目,若为最后一个场次,设为0
+	 */
+	public void setNextTurnNo(java.lang.String nextTurnNo) {
+		set("next_turn_no", nextTurnNo);
+	}
+	
+	/**
+	 * 下个场次编号 表示该场次的下个场次,用于连接整个项目,若为最后一个场次,设为0
+	 */
+	public java.lang.String getNextTurnNo() {
+		return getStr("next_turn_no");
 	}
 	
 }

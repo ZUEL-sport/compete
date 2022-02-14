@@ -10,7 +10,7 @@ Table: complaint
  category     | TINYINT UNSIGNED(3) | NO   |     |                   | 申诉类别 0-成绩错误;1-举报他人;2-其他错误
  user_no      | VARCHAR(16)         | NO   |     |                   | 学号/工号 表示提交申诉的人
  description  | VARCHAR(1024)       | NO   |     |                   | 描述      
- state        | TINYINT UNSIGNED(3) | NO   |     |                   | 状态 0-未处理;1-已处理
+ state        | TINYINT UNSIGNED(3) | NO   |     | 0                 | 状态 0-未处理;1-已处理
  result       | VARCHAR(1024)       | YES  |     |                   | 处理结果 用户提交时为空,管理员处理后将结果写入
 --------------+---------------------+------+-----+-------------------+---------
 
@@ -42,22 +42,23 @@ Table: enroll
 --------------+---------------------+------+-----+-------------------+---------
 
 Table: game
---------------+---------------------+------+-----+-------------------+---------
- Field        | Type                | Null | Key | Default           | Remarks 
---------------+---------------------+------+-----+-------------------+---------
- id           | BIGINT UNSIGNED(20) | NO   | PRI |                   | 主键 主键唯一标识
- created_time | TIMESTAMP(26)       | NO   |     | CURRENT_TIMESTAMP | 创建时间 创建时间
- updated_time | TIMESTAMP(26)       | NO   |     | CURRENT_TIMESTAMP | 更新时间 更新时间
- is_deleted   | TINYINT UNSIGNED(3) | NO   |     | 0                 | 是否删除 0-未删除;1-已删除
- game_no      | VARCHAR(16)         | NO   |     |                   | 项目编号 项目编号
- name         | VARCHAR(32)         | NO   |     |                   | 项目名称 比赛的名称
- type_no      | VARCHAR(16)         | NO   |     |                   | 类别编号 类别编号
- object       | TINYINT UNSIGNED(3) | NO   |     |                   | 参赛人群 0-不限,1-学生,2-老师
- sex          | TINYINT UNSIGNED(3) | NO   |     |                   | 性别要求 0-不限,1-男,2-女
- turn         | INT(10)             | NO   |     |                   | 比赛总场次 全部赛程所需的场次
- process_no   | VARCHAR(16)         | NO   |     |                   | 流程编号 流程编号
- description  | VARCHAR(1024)       | NO   |     |                   | 项目描述 项目的介绍
---------------+---------------------+------+-----+-------------------+---------
+--------------+---------------------+------+-----+---------------------+---------
+ Field        | Type                | Null | Key | Default             | Remarks 
+--------------+---------------------+------+-----+---------------------+---------
+ id           | BIGINT UNSIGNED(20) | NO   | PRI |                     | 主键;主键唯一标识
+ created_time | TIMESTAMP(26)       | NO   |     | CURRENT_TIMESTAMP   | 创建时间;创建时间
+ updated_time | TIMESTAMP(26)       | NO   |     | 0000-00-00 00:00:00 | 更新时间;更新时间
+ is_deleted   | TINYINT UNSIGNED(3) | NO   |     |                     | 是否删除;0-未删除;1-已删除
+ game_no      | VARCHAR(16)         | NO   |     |                     | 项目编号;项目编号
+ name         | VARCHAR(32)         | NO   |     |                     | 项目名称;比赛的名称
+ type         | TINYINT UNSIGNED(3) | NO   |     |                     | 类别编号;0-个人,1-团队
+ object       | TINYINT UNSIGNED(3) | NO   |     |                     | 参赛人群;0-不限,1-学生,2-老师
+ sex          | TINYINT UNSIGNED(3) | NO   |     |                     | 性别要求;0-不限,1-男,2-女
+ turn         | INT(10)             | NO   |     |                     | 比赛总场次;全部赛程所需的场次
+ process_no   | VARCHAR(16)         | NO   |     |                     | 流程编号;流程编号
+ now_turn_no  | VARCHAR(16)         | NO   |     |                     | 当前场次编号;表示当前场次,用于流程中成绩录入时确定场次
+ description  | VARCHAR(1024)       | NO   |     |                     | 项目描述;项目的介绍
+--------------+---------------------+------+-----+---------------------+---------
 
 Table: game_turn
 --------------+---------------------+------+-----+-------------------+---------
@@ -68,23 +69,12 @@ Table: game_turn
  updated_time | TIMESTAMP(26)       | NO   |     | CURRENT_TIMESTAMP | 更新时间 更新时间
  is_deleted   | TINYINT UNSIGNED(3) | NO   |     | 0                 | 是否删除 0-未删除;1-已删除
  game_no      | VARCHAR(16)         | NO   |     |                   | 项目编号    
- turn_no      | VARCHAR(16)         | NO   |     |                   | 场次编号,作为场次的主键唯一存在
+ turn_no      | VARCHAR(16)         | NO   |     |                   | 场次编号 存储第几场
  name         | VARCHAR(32)         | NO   |     |                   | 名称 本场名称 
  place        | VARCHAR(32)         | NO   |     |                   | 比赛场地 比赛场地
  time         | VARCHAR(32)         | NO   |     |                   | 比赛时间 比赛时间
  num          | INT(10)             | NO   |     |                   | 参赛人数 参加本场比赛的人数
---------------+---------------------+------+-----+-------------------+---------
-
-Table: game_type
---------------+---------------------+------+-----+-------------------+---------
- Field        | Type                | Null | Key | Default           | Remarks 
---------------+---------------------+------+-----+-------------------+---------
- id           | BIGINT UNSIGNED(20) | NO   | PRI |                   | 主键 主键唯一标识
- created_time | TIMESTAMP(26)       | NO   |     | CURRENT_TIMESTAMP | 创建时间 创建时间
- updated_time | TIMESTAMP(26)       | NO   |     | CURRENT_TIMESTAMP | 更新时间 更新时间
- is_deleted   | TINYINT UNSIGNED(3) | NO   |     | 0                 | 是否删除 0-未删除;1-已删除
- type_no      | VARCHAR(16)         | NO   |     |                   | 类比编号 每个类别对应的编号
- name         | VARCHAR(32)         | NO   |     |                   | 类别名称 记录每个类别的名称
+ next_turn_no | VARCHAR(16)         | NO   |     |                   | 下个场次编号 表示该场次的下个场次,用于连接整个项目,若为最后一个场次,设为0
 --------------+---------------------+------+-----+-------------------+---------
 
 Table: grade

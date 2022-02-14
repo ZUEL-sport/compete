@@ -98,6 +98,30 @@ public class GameService extends BaseService<Game> {
         return Db.find(sqlPara);
     }
 
+    /***
+     * 在成绩表中查找某项目当前场次的所有参赛者(个人),项目名称,场次名称,成绩,排名,用于在晋级列表中显示
+     * 在grade表中找到该turn_no的参赛信息,用no在user中查询得到name
+     * @param turn_no
+     * @return
+     */
+    public List<Record> getAllPeopleGame(String turn_no){
+        Kv cond = Kv.by("turn_no",turn_no);
+        SqlPara sqlPara=Db.getSqlPara("game.getAllPeopleGame",cond);
+        return Db.find(sqlPara);
+    }
+
+    /***
+     * 在成绩表中查找某项目当前场次的所有参赛者(团队),项目名称,场次名称,成绩,排名,用于在晋级列表中显示
+     * 在grade表中找到该turn_no的参赛信息,用no在team中查询得到name
+     * @param turn_no
+     * @return
+     */
+    public List<Record> getAllTeamGame(String turn_no){
+        Kv cond = Kv.by("turn_no",turn_no);
+        SqlPara sqlPara=Db.getSqlPara("game.getAllTeamGame",cond);
+        return Db.find(sqlPara);
+    }
+
 
     /***
      * 在成绩表中查找有成绩的姓名,项目名称,场次名称,成绩,排名

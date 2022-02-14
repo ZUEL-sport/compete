@@ -21,7 +21,6 @@ public class _MappingKit {
 		arp.addMapping("enroll", "id", Enroll.class);
 		arp.addMapping("game", "id", Game.class);
 		arp.addMapping("game_turn", "id", GameTurn.class);
-		arp.addMapping("game_type", "id", GameType.class);
 		arp.addMapping("grade", "id", Grade.class);
 		arp.addMapping("process", "id", Process.class);
 		arp.addMapping("referee", "id", Referee.class);
