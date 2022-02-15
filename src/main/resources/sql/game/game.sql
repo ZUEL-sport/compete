@@ -1,9 +1,9 @@
 #sql("listByNoProcess")
-select name from game where process_no not in (select process_no from process where process.name = #para(name) and is_deleted=0)
+select id,name from game where process_no not in (select process_no from process where process.name = #para(name) and is_deleted=0)
 #end
 
 #sql("listByProcess")
-select name from game where process_no in (select process_no from process where process.name = #para(name) and is_deleted=0)
+select id,name from game where process_no in (select process_no from process where process.name = #para(name) and is_deleted=0)
 #end
 
 #sql("getGame")
