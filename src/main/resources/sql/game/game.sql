@@ -70,3 +70,11 @@ select game.name as game_name,process.name as process_name from game,process whe
 #sql("updateGrade")
 update grade set grade=#para(grade) where no=#para(user_no) and turn_no=#para(turn_no) and is_deleted=0
 #end
+
+#sql("showSignedGame")
+select name,object,sex,turn,process_no,now_turn_no,description from game where is_deleted=0 and process_no="报名结束"
+#end
+
+#sql("getSavingMember")
+select * from enroll where is_deleted=0 and player_no=#para(playerNo) and game_no=#para(gameNo)
+#end

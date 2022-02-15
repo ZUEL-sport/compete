@@ -9,13 +9,16 @@ import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import org.common.interceptor.CorsInterceptor;
+import org.common.module.Cookie;
 import org.common.module.Game;
 import org.common.module.TeamMate;
 import org.common.module.User;
 import org.game.GameService;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -31,6 +34,7 @@ public class UserController extends Controller {
     UserService userService;
     @Inject
     GameService gameService;
+    private static final long COOKIE_LIFE = 3600;
     /**
      * 登录响应
      * 学号+密码实现登录
@@ -49,10 +53,20 @@ public class UserController extends Controller {
         }
         else{
             renderJson(BaseResult.ok("用户登录成功"));
+            Cookie cookie = new Cookie();
+            cookie.setUuno(user.getUserNo());
+            cookie.setAccessToken("登录");
+            cookie.setExpiresIn(BigInteger.valueOf(COOKIE_LIFE));
+            cookie.setExpiresTime(BigInteger.valueOf(System.currentTimeMillis() + COOKIE_LIFE));
+            cookie.save();
+            setCookie("user_no", user.getUserNo(), (int)COOKIE_LIFE);
             return;
         }
     }
 
+    /**
+     * 注册
+     */
     @Param(name = "user_no",required = true)
     @Param(name = "school_no",required = true)
     @Param(name = "name",required = true)
@@ -81,11 +95,118 @@ public class UserController extends Controller {
         }
     }
 
+    /**
+     * 显示个人信息
+     * 返回前端个人信息
+     */
+    public void userDetail(){
+        Record record = userService.getUserDetail(getCookie("user_no"));
+        renderJson(DataResult.data(record));
+    }
+
+    /**
+     * 个人信息修改
+     * @param name 姓名
+     * @param phone 电话号码
+     * @param sex 性别
+     */
+    @Param(name = "name")
+    @Param(name = "phone")
+    @Param(name = "sex")
+    public void changeUserDetail(String name, String phone, String sex){
+        User user = userService.getByUserNo(getCookie("user_no"));
+        if(StrKit.notNull(name)){
+            user.setName(name);
+        }
+        if(StrKit.notNull(phone)){
+            user.setPhone(phone);
+        }
+        if(StrKit.notNull(sex)){
+            user.setSex("男".equals(sex) ? 0 : 1);
+        }
+        renderJson(user.update() ? BaseResult.ok("修改成功！") : BaseResult.fail("修改失败！"));
+    }
+
+    /**
+     * 团队信息显示（身为队长时）
+     * 返回前端我为队长的所有团队的团队信息
+     */
+    public void myTeamDetail(){
+        List<Record> records = userService.getMyTeamDetail(getCookie("user_no"));
+        if(StrKit.notNull(records)){
+            renderJson(DataResult.data(records));
+            return;
+        }
+        renderJson(BaseResult.fail("您不是任何团队的队长!"));
+    }
+
+    /**
+     * 显示所有该裁判能录入成绩的项目
+     * 返回前端 该裁判能录入的所有比赛
+     */
+    public void showScoreInput(){
+        List<Record> records = userService.getMyScoreInput(getCookie("user_no"));
+        if(StrKit.notNull(records)){
+            renderJson(DataResult.data(records));
+            return;
+        }
+        renderJson(BaseResult.fail("目前没有需要您录入成绩的比赛"));
+    }
+
+    /**
+     * 展示本场比赛能录入成绩的所有运动员的信息
+     */
+    @Param(name = "game_no",required = true)
+    @Param(name = "turn_no",required = true)
+    public void showInputMembers(){
+        List<Record> members = userService.showInputMembers(getPara("game_no"), getPara("turn_no"));
+        if(StrKit.notNull(members)){
+            renderJson(DataResult.data(members));
+            return;
+        }
+        renderJson(BaseResult.fail("未查询到需录入成绩的运动员"));
+    }
+
+    /**
+     * 录入成绩
+     */
+    @Param(name = "mate_no",required = true)
+    @Param(name = "game_no",required = true)
+    @Param(name = "turn_no",required = true)
+    @Param(name = "grade",required = true)
+    @Param(name = "ranking",required = true)
+    public void inputScore(){
+        Record member = userService.inputScore(getPara("mate_no"), getPara("game_no"), getPara("turn_no"));
+        member.set("grade", getPara("grade")).set("ranking", getPara("ranking"));
+        renderJson(Db.update("grade", member) ? BaseResult.ok() : BaseResult.fail("成绩录入失败"));
+    }
+
+    /**
+     * 显示待处理的申诉
+     */
+    public void showComplaint(){
+        List<Record> records = userService.showComplaint();
+        if(StrKit.notNull(records)){
+            renderJson(DataResult.data(records));
+            return;
+        }
+        renderJson(BaseResult.fail("目前没有未处理的申诉"));
+    }
+
+    /**
+     * 显示申诉结果
+     */
+    public void showComplaintResult(){
+        List<Record> records = userService.showComplaintResult();
+        if(StrKit.notNull(records)){
+            renderJson(DataResult.data(records));
+            return;
+        }
+        renderJson(BaseResult.fail("当前没有已处理的申诉"));
+    }
 
     public void resetPassword(){
-
-        User user = userService.getByUserNo(getPara("user_no"));
-
+        User user = userService.getByUserNo(getCookie("user_no"));
         if(getPara("user_no").equals(user.getUserNo())){
             user.setPassword(getPara("password"));
             user.update();
@@ -140,13 +261,12 @@ public class UserController extends Controller {
      *
      * 在数据库查询时即获得所需结果显然更为简便
      */
-    @Param(name = "user_no",required = true)
     public void myGame(){
         //个人项目
-        Record user = userService.getPeople(getPara("user_no"));
-        List<Record> myGame= gameService.getMyGame(getPara("user_no"));
+        Record user = userService.getPeople(getCookie("user_no"));
+        List<Record> myGame = gameService.getMyGame(getCookie("user_no"));
         //团队项目
-        List<Record> myTeam= userService.myTeam(getPara("user_no"));
+        List<Record> myTeam = userService.myTeam(getPara("user_no"));
         /*遍历根据myTeam中的team_no获取参赛信息,将参赛信息存入myGame*/
         for(Record record:myTeam){
             myGame.addAll(gameService.getTeamGame(record.getStr("team_no")));
@@ -159,9 +279,8 @@ public class UserController extends Controller {
      * 我的成绩(已完成的比赛)
      * 根据编号(user_no)从成绩表中找到grade
      */
-    @Param(name = "user_no",required = true)
     public void myGrade(){
-        User user = userService.getByUserNo(getPara("user_no"));
+        User user = userService.getByUserNo(getCookie("user_no"));
         /*有成绩的参赛信息*/
         List<Record> myGame= gameService.getMyGrade(user.getUserNo());
         renderJson(DataResult.data(myGame));
@@ -172,9 +291,8 @@ public class UserController extends Controller {
      * 团队成绩
      * 根据编号(user_no)找到团队,用团队编号从成绩表中找到grade
      */
-    @Param(name = "user_no",required = true)
     public void teamGrade(){
-        List<Record> myTeam= userService.myTeam(getPara("user_no"));
+        List<Record> myTeam= userService.myTeam(getCookie("user_no"));
         List<Record> myGame= new ArrayList<Record>();
         /*遍历根据myTeam中的team_no获取成绩信息,将参赛信息存入myGame*/
         for(Record record:myTeam){
