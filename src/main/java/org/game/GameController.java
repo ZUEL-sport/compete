@@ -10,9 +10,7 @@ import com.jfinal.core.Controller;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Record;
 import org.common.interceptor.CorsInterceptor;
-import org.common.module.Game;
-import org.common.module.Grade;
-import org.common.module.User;
+import org.common.module.*;
 import org.user.UserController;
 import org.user.UserService;
 
@@ -195,5 +193,119 @@ public class GameController extends Controller {
             renderJson(BaseResult.fail("成绩修改失败!"));
         }
 
+    }
+
+    /***
+            * 提交申诉交给管理员
+ */
+    @Param(name = "user_no",required = true)
+    @Param(name = "category",required = true)
+    @Param(name = "description",required = true)
+    public void submitComplaint(){
+        Calendar ca = Calendar.getInstance();
+        int day=ca.get(Calendar.DATE);//获取日
+        int minute=ca.get(Calendar.MINUTE);//分
+        int hour=ca.get(Calendar.HOUR);//小时
+        int second=ca.get(Calendar.SECOND);//秒
+        String no = String.valueOf(day)+String.valueOf(minute)+String.valueOf(hour)+String.valueOf(second);
+
+        Complaint complaint = new Complaint();
+        complaint.setComplaintNo(no);
+        complaint.setUserNo(getPara("user_no"));
+        complaint.setCategory(Integer.valueOf(getPara("category")));
+        complaint.setDescription(getPara("description"));
+        complaint.save();
+        renderJson(BaseResult.ok("提交申诉成功"));
+        return;
+
+    }
+
+//    /***
+//     * 在用户界面返回申诉结果
+//     */
+//    @Param(name = "user_no",required = true)
+//    public void complaintResults(){
+//        Complaint complaint=new Complaint();
+//        complaint=  gameService.getByState(getPara("user_no"));
+//
+//        if(complaint.getState()==0){
+//            renderJson(BaseResult.fail("未查询到申诉结果!"));
+//        }else {
+//            List<Record> complaintResult = gameService.getComplaintResult(getPara("user_no"));
+//            renderJson(complaintResult);
+//            renderJson(BaseResult.fail("成功查询到申诉结果!"));
+//        }
+//     }
+    /***
+     * 存入比赛信息
+     */
+    public void gameInformation(){
+        Game game=new Game();
+        game.setGameNo(getPara("game_no"));
+        game.setName(getPara("name"));
+        game.setType(Integer.valueOf(getPara("type")));
+        game.setObject(Integer.valueOf(getPara("object")));
+        game.setSex(Integer.valueOf(getPara("sex")));
+        game.setTurn(Integer.valueOf(getPara("turn")));
+        game.setProcessNo(getPara("process_no"));
+        game.setNowTurnNo(getPara("now_turn_no"));
+        game.setDescription(getPara("description"));
+        game.save();
+        renderJson(BaseResult.ok("项目信息保存成功"));
+        return;
+    }
+
+    /***
+     * 存入场次信息
+     */
+    public void gameTurnInformation(){
+        GameTurn gameTurn = new GameTurn();
+        gameTurn.setGameNo(getPara("game_no"));
+        gameTurn.setTurnNo(getPara("turn_no"));
+        gameTurn.setName(getPara("name"));
+        gameTurn.setPlace(getPara("place"));
+        gameTurn.setTime(getPara("time"));
+        gameTurn.setNum(Integer.valueOf(getPara("num")));
+        gameTurn.setNextTurnNo(getPara("next_turn_no"));
+        gameTurn.save();
+        renderJson(BaseResult.ok("场次信息保存成功"));
+        return;
+    }
+
+    /***
+     * 为各个赛程分配裁判,存入裁判表
+     */
+    public void allotReferee(){
+        Referee referee = new Referee();
+        referee.setGameNo(getPara("game_no"));
+        referee.setTurnNo(getPara("turn_no"));
+        referee.setUserNo(getPara("user_no"));
+        referee.save();
+        renderJson(BaseResult.ok("分配裁判成功"));
+        return;
+    }
+
+    /***
+     * 创建队伍存入团队表,并将团队编号存入参赛信息表
+     */
+    public void foundTeam(){
+        Calendar ca = Calendar.getInstance();
+        int day=ca.get(Calendar.DATE);//获取日
+        int minute=ca.get(Calendar.MINUTE);//分
+        int hour=ca.get(Calendar.HOUR);//小时
+        int second=ca.get(Calendar.SECOND);//秒
+        String no = String.valueOf(day)+String.valueOf(minute)+String.valueOf(hour)+String.valueOf(second);
+
+        Team team = new Team();
+        team.setTeamNo(no);
+        team.setName(getPara("name"));
+        team.save();
+        Grade grade = new Grade();
+        grade.setGameNo(getPara("game_no"));
+        grade.setTurnNo(getPara("turn_no"));
+        grade.setNo(no);
+        grade.save();
+        renderJson(BaseResult.ok("创建队伍成功"));
+        return;
     }
 }

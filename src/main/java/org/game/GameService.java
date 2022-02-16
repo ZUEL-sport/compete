@@ -5,6 +5,7 @@ import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
+import org.common.module.Complaint;
 import org.common.module.Game;
 
 import java.util.List;
@@ -176,4 +177,17 @@ public class GameService extends BaseService<Game> {
         SqlPara sqlPara= Db.getSqlPara("game.updateGrade",cond);
         return Db.update(sqlPara);
     }
+
+//    public Complaint getByState(String user_no){
+//        Kv cond = Kv.by("user_no",user_no);
+//        return get(cond,"getByState");
+//        //return Db.find(sqlPara);
+//    }
+//
+//
+//    public List<Record> getComplaintResult(String user_no){
+//        Kv cond = Kv.by("user_no",user_no);
+//        SqlPara sqlPara=Db.getSqlPara("game.getComplaintResult",cond);
+//        return Db.find(sqlPara);
+//    }
 };
