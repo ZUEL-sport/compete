@@ -56,7 +56,10 @@ from team,game,game_turn,grade where grade.no=team.team_no and grade.game_no=gam
 #end
 
 #sql("listByGrade")
-select * from grade where grade.game_no = #para(game_no) and grade.turn_no = #para(turn_no) and is_deleted=0
+select grade.no,game.name,game_turn.name,grade,ranking
+from grade,game,game_turn
+where grade.game_no=game.game_no and grade.turn_no=game_turn.turn_no and
+        grade.game_no = #para(game_no) and grade.turn_no = #para(turn_no) and grade.is_deleted=0
 #end
 
 #sql("updateGameProcess")
@@ -69,4 +72,20 @@ select game.name as game_name,process.name as process_name from game,process whe
 
 #sql("updateGrade")
 update grade set grade=#para(grade) where no=#para(user_no) and turn_no=#para(turn_no) and is_deleted=0
+#end
+
+#sql("getByState")
+select *
+from complaint
+where complaint.user_no=#para(user_no) and is_deleted=0
+#end
+
+#sql("getByComplaintNo")
+select * from complaint where user_no = #para(user_no) and is_deleted=0
+#end
+
+#sql("getComplaintResult")
+select description,result
+from complaint
+where user_no = #para(user_no) and is_deleted=0 and state=1
 #end
