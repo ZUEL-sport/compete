@@ -232,7 +232,7 @@ public class GameController extends Controller {
 //            renderJson(BaseResult.fail("未查询到申诉结果!"));
 //        }else {
 //            List<Record> complaintResult = gameService.getComplaintResult(getPara("user_no"));
-//            renderJson(complaintResult);
+//            renderJson(DataResult,data(complaintResult));
 //            renderJson(BaseResult.fail("成功查询到申诉结果!"));
 //        }
 //     }
