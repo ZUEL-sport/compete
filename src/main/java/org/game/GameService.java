@@ -29,8 +29,8 @@ public class GameService extends BaseService<Game> {
 
     /***
      * 查找比赛流程的名字是"name"的比赛
-     * @param name
-     * @return
+     * @param name 名称
+     * @return 名称
      */
     public List<Record> listByProcess(String name){
         Kv cond=Kv.by("name",name);
@@ -40,14 +40,30 @@ public class GameService extends BaseService<Game> {
 
     /**
      * 根据game_no获取game信息
-     * @param game_no
-     * @return
+     * @param gameNo 项目编号
+     * @return game信息和场次信息
      */
-    public Record getGame(String game_no){
-        Kv cond = Kv.by("game_no",game_no);
+    public Record getGame(String gameNo){
+        Kv cond = Kv.by("game_no",gameNo);
         SqlPara sqlPara = Db.getSqlPara("game.getGame",cond);
         return Db.findFirst(sqlPara);
     }
+
+    /**
+     * 项目详情
+     * @param gameNo 项目编号
+     * @return 项目详情
+     */
+    public List<Record> getGameDetail(String gameNo){
+        Kv cond = Kv.by("game_no",gameNo);
+        SqlPara sqlPara = Db.getSqlPara("game.getGame", cond);
+        List<Record> records = Db.find(sqlPara);
+        sqlPara.clear();
+        sqlPara = Db.getSqlPara("game.getAllTurn", cond);
+        records.addAll(Db.find(sqlPara));
+        return records;
+    }
+
     /***
      * 根据turn_no获取turn信息(turn_no可以唯一决定某个场次,而不是game_no+turn_no唯一决定场次)
      * @param turn_no
@@ -190,4 +206,19 @@ public class GameService extends BaseService<Game> {
 //        SqlPara sqlPara=Db.getSqlPara("game.getComplaintResult",cond);
 //        return Db.find(sqlPara);
 //    }
+
+    /**
+     * @return 报名结束的比赛
+     */
+    public List<Record> showSignedGame(){
+        return Db.find("game.showSignedGame");
+    }
+
+    public Record getSavingMember(String playerNo, String gameNo){
+        Kv cond = Kv.by("playerNo", playerNo).set("gameNo", gameNo);
+        SqlPara sqlPara = Db.getSqlPara("game.getSavingMember", cond);
+        Record record = Db.findFirst(sqlPara);
+        record.set("is_pass", 1);
+        return record;
+    }
 };

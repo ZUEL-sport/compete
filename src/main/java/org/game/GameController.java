@@ -8,6 +8,7 @@ import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import org.common.interceptor.CorsInterceptor;
 import org.common.module.*;
@@ -46,9 +47,9 @@ public class GameController extends Controller {
      */
     @Param(name = "game_no",required = true)
     public void gameDetail(){
-        Record record = gameService.getGame(getPara("game_no"));
-        if(record != null){
-            renderJson(DataResult.data(record));
+        List<Record> records = gameService.getGameDetail(getPara("game_no"));
+        if(records != null){
+            renderJson(DataResult.data(records));
         }
         else{
             renderJson(BaseResult.fail("未查询到比赛信息"));
@@ -68,7 +69,6 @@ public class GameController extends Controller {
         else{
             renderJson(DataResult.data(list));
         }
-        return;
     }
 
     /**
@@ -196,8 +196,8 @@ public class GameController extends Controller {
     }
 
     /***
-            * 提交申诉交给管理员
- */
+     * 提交申诉交给管理员
+     */
     @Param(name = "user_no",required = true)
     @Param(name = "category",required = true)
     @Param(name = "description",required = true)
@@ -307,5 +307,34 @@ public class GameController extends Controller {
         grade.save();
         renderJson(BaseResult.ok("创建队伍成功"));
         return;
+    }
+
+    /**
+     * 显示“报名结束"的项目
+     */
+    public void showSignedGame(){
+        List<Record> records = gameService.showSignedGame();
+        if(StrKit.notNull(records)){
+            renderJson(DataResult.data(records));
+            return;
+        }
+        renderJson(BaseResult.fail("未查询到报名结束的比赛"));
+    }
+
+    /**
+     * 存储审核完成的运动员
+     */
+    @Param(name = "user_no", required = true)
+    @Param(name = "game_no", required = true)
+    public void saveMember(){
+        Record record = gameService.getSavingMember(getPara("user_no"), getPara("game_no"));
+        if(Db.save("enroll", record)){
+            Grade grade = new Grade();
+            grade.setNo(record.getStr("player_no"));
+            grade.setGameNo(record.getStr("game_no"));
+            grade.setTurnNo(Db.queryStr("select turn_no from game where is_deleted=0 and game_no=?", record.getStr("game_no")));
+            renderJson(grade.save() ? BaseResult.ok() : BaseResult.fail("提交失败！"));
+        }
+        renderJson(BaseResult.fail("提交失败！"));
     }
 }
