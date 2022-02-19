@@ -80,7 +80,6 @@ public class UserService  extends BaseService<User> {
                 cond.set("team_no", Integer.valueOf(record.getStr("team_no")));
                 sqlPara = Db.getSqlPara("user.getMyTeamDetail", cond);
                 myTeam.addAll(Db.find(sqlPara));
-                System.out.println("pass");
             }
             for(Record record : myTeam){
                 sex = record.getInt("sex");
@@ -88,7 +87,6 @@ public class UserService  extends BaseService<User> {
                 record.set("sex", sex == 0 ? "男" : "女");
                 record.set("ranks", ranks == 0 ? "队员" : "队长");
             }
-            System.out.println(myTeam.size());
             return myTeam;
         }
         catch (Exception e){
