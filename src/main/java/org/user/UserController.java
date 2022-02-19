@@ -105,25 +105,28 @@ public class UserController extends Controller {
 
     /**
      * 个人信息修改
-     * @param name 姓名
-     * @param phone 电话号码
-     * @param sex 性别
      */
     @Param(name = "name")
     @Param(name = "phone")
     @Param(name = "sex")
-    public void changeUserDetail(String name, String phone, String sex){
+    public void changeUserDetail(){
         User user = userService.getByUserNo(getCookie("user_no"));
-        if(StrKit.notNull(name)){
-            user.setName(name);
+        System.out.println(user.getUserNo());
+        if(StrKit.notNull(getPara("name"))){
+            user.setName(getPara("name"));
         }
-        if(StrKit.notNull(phone)){
-            user.setPhone(phone);
+        if(StrKit.notNull(getPara("phone"))){
+            user.setPhone(getPara("phone"));
         }
-        if(StrKit.notNull(sex)){
-            user.setSex("男".equals(sex) ? 0 : 1);
+        if(StrKit.notNull(getPara("sex"))){
+            user.setSex("男".equals(getPara("sex")) ? 0 : 1);
         }
-        renderJson(user.update() ? BaseResult.ok("修改成功！") : BaseResult.fail("修改失败！"));
+        try{
+            renderJson(user.update() ? BaseResult.ok("修改成功！") : BaseResult.fail("修改失败！"));
+        }
+        catch (Exception e){
+            renderJson(BaseResult.fail("修改失败！"));
+        }
     }
 
     /**
@@ -132,7 +135,7 @@ public class UserController extends Controller {
      */
     public void myTeamDetail(){
         List<Record> records = userService.getMyTeamDetail(getCookie("user_no"));
-        if(StrKit.notNull(records)){
+        if(StrKit.notNull(records) && records.size() != 0){
             renderJson(DataResult.data(records));
             return;
         }
@@ -145,7 +148,7 @@ public class UserController extends Controller {
      */
     public void showScoreInput(){
         List<Record> records = userService.getMyScoreInput(getCookie("user_no"));
-        if(StrKit.notNull(records)){
+        if(StrKit.notNull(records) && records.size() != 0){
             renderJson(DataResult.data(records));
             return;
         }
@@ -159,7 +162,7 @@ public class UserController extends Controller {
     @Param(name = "turn_no",required = true)
     public void showInputMembers(){
         List<Record> members = userService.showInputMembers(getPara("game_no"), getPara("turn_no"));
-        if(StrKit.notNull(members)){
+        if(StrKit.notNull(members) && members.size() != 0){
             renderJson(DataResult.data(members));
             return;
         }

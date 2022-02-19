@@ -96,7 +96,7 @@ where user_no = #para(user_no) and is_deleted=0 and state=1
 #end
 
 #sql("showSignedGame")
-select name,object,sex,turn,process_no,now_turn_no,description from game where is_deleted=0 and process_no="报名结束"
+select name,object,sex,turn,process_no,now_turn_no,description from game where is_deleted=0 and process_no=3
 #end
 
 #sql("getSavingMember")
