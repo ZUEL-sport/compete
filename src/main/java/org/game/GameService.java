@@ -211,14 +211,21 @@ public class GameService extends BaseService<Game> {
      * @return 报名结束的比赛
      */
     public List<Record> showSignedGame(){
-        return Db.find("game.showSignedGame");
+        SqlPara sqlPara = Db.getSqlPara("game.showSignedGame");
+        return Db.find(sqlPara);
     }
 
     public Record getSavingMember(String playerNo, String gameNo){
         Kv cond = Kv.by("playerNo", playerNo).set("gameNo", gameNo);
         SqlPara sqlPara = Db.getSqlPara("game.getSavingMember", cond);
-        Record record = Db.findFirst(sqlPara);
-        record.set("is_pass", 1);
-        return record;
+        try{
+            Record record = Db.findFirst(sqlPara);
+            record.set("is_pass", 1);
+            return record;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 };

@@ -314,7 +314,7 @@ public class GameController extends Controller {
      */
     public void showSignedGame(){
         List<Record> records = gameService.showSignedGame();
-        if(StrKit.notNull(records)){
+        if(StrKit.notNull(records) && records.size() > 0){
             renderJson(DataResult.data(records));
             return;
         }
@@ -327,14 +327,19 @@ public class GameController extends Controller {
     @Param(name = "user_no", required = true)
     @Param(name = "game_no", required = true)
     public void saveMember(){
-        Record record = gameService.getSavingMember(getPara("user_no"), getPara("game_no"));
-        if(Db.save("enroll", record)){
-            Grade grade = new Grade();
-            grade.setNo(record.getStr("player_no"));
-            grade.setGameNo(record.getStr("game_no"));
-            grade.setTurnNo(Db.queryStr("select turn_no from game where is_deleted=0 and game_no=?", record.getStr("game_no")));
-            renderJson(grade.save() ? BaseResult.ok() : BaseResult.fail("提交失败！"));
+        try{
+            Record record = gameService.getSavingMember(getPara("user_no"), getPara("game_no"));
+            if(Db.update("enroll", record)){
+                Grade grade = new Grade();
+                grade.setNo(record.getStr("player_no"));
+                grade.setGameNo(record.getStr("game_no"));
+                grade.setTurnNo(Db.queryStr("select now_turn_no from game where is_deleted=0 and game_no=?", record.getStr("game_no")));
+                renderJson(grade.save() ? BaseResult.ok() : BaseResult.fail("提交失败！"));
+            }
         }
-        renderJson(BaseResult.fail("提交失败！"));
+        catch (Exception e){
+            e.printStackTrace();
+            renderJson(BaseResult.fail("提交失败！"));
+        }
     }
 }

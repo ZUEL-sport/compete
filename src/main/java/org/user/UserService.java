@@ -71,21 +71,28 @@ public class UserService  extends BaseService<User> {
         int sex, ranks;
         Kv cond = Kv.by("user_no", no);
         SqlPara sqlPara = Db.getSqlPara("user.getMyTeam", cond);
-        List<Record> teams = Db.find(sqlPara);
-        List<Record> myTeam = new ArrayList<>();
-        for(Record record : teams){
-            cond.clear();
-            cond.set("team_no",record.getStr("team_no"));
-            sqlPara = Db.getSqlPara("user.getMyTeamDetail", cond);
-            myTeam.addAll(Db.find(sqlPara));
+        List<Record> teams, myTeam;
+        try{
+            teams = Db.find(sqlPara);
+            myTeam = new ArrayList<>();
+            for(Record record : teams){
+                cond.clear();
+                cond.set("team_no", Integer.valueOf(record.getStr("team_no")));
+                sqlPara = Db.getSqlPara("user.getMyTeamDetail", cond);
+                myTeam.addAll(Db.find(sqlPara));
+            }
+            for(Record record : myTeam){
+                sex = record.getInt("sex");
+                ranks = record.getInt("user_ranks");
+                record.set("sex", sex == 0 ? "男" : "女");
+                record.set("ranks", ranks == 0 ? "队员" : "队长");
+            }
+            return myTeam;
         }
-        for(Record record : myTeam){
-            sex = record.getInt("sex");
-            ranks = record.getInt("ranks");
-            record.set("sex", sex == 0 ? "男" : "女");
-            record.set("ranks", ranks == 0 ? "队员" : "队长");
+        catch (Exception e){
+            e.printStackTrace();
+            return null;
         }
-        return myTeam;
     }
 
     /**
@@ -111,7 +118,7 @@ public class UserService  extends BaseService<User> {
      * @return 运动员信息
      */
     public Record inputScore(String mateNo, String gameNo, String turnNo){
-        Kv cond = Kv.by("mate_no", mateNo).set("game_no", gameNo).set("turn_no", turnNo);
+        Kv cond = Kv.by("mateNo", mateNo).set("gameNo", gameNo).set("turnNo", turnNo).set("gameNo", gameNo);
         SqlPara sqlPara = Db.getSqlPara("user.getInputMember", cond);
         return Db.findFirst(sqlPara);
     }
@@ -121,14 +128,16 @@ public class UserService  extends BaseService<User> {
      * @return 带出来的申诉
      */
     public List<Record> showComplaint(){
-        return Db.find("user.showComplaint");
+        SqlPara sqlPara = Db.getSqlPara("user.showComplaint");
+        return Db.find(sqlPara);
     }
 
     /**
      * @return 已处理的申诉
      */
     public List<Record> showComplaintResult(){
-        return Db.find("user.showComplaintResult");
+        SqlPara sqlPara = Db.getSqlPara("user.showComplaintResult");
+        return Db.find(sqlPara);
     }
 
     /***

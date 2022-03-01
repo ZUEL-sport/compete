@@ -28,22 +28,22 @@ from user,school where user.user_no = #para(user_no) and user.is_deleted=0 and u
 #end
 
 #sql("getMyTeam")
-select team.team_no as team_no from user,team_mate where user.user_no = team_mate.user_no and user.is_deleted=0
-                                                     and team_mate.ranks=1 and team_mate.is_deleted=0 and user.user_no=#para(user_no)
+select team_mate.team_no as team_no from user,team_mate where user.user_no = team_mate.mate_no and user.is_deleted=0
+and team_mate.ranks=1 and team_mate.is_deleted=0 and user.user_no=#para(user_no)
 #end
 
 #sql("getMyTeamDetail")
-select team.team_no as team_no,team.name as team_name,user.name as user_name,user.user_no as user_no,user.sex as sex,user.ranks as user_ranks
-from user,team,team_mates
-where user.user_no = team_mate.user_no and user.is_deleted=0 and team_mate.is_deleted=0 and team_mate.team_no = team.team_no
+select team.team_no as team_no,team.name as team_name,user.name as user_name,user.user_no as user_no,user.sex as sex,team_mate.ranks as user_ranks
+from user,team,team_mate
+where user.user_no = team_mate.mate_no and user.is_deleted=0 and team_mate.is_deleted=0 and team_mate.team_no = team.team_no
   and team.is_deleted=0 and team.team_no=#para(team_no)
 #end
 
 #sql("getMyScoreInput")
-select game.name as game_name,game_turn.name as turn_name,game_turn.num as num
+select game.game_no as game_no,game.name as game_name,game_turn.name as turn_name,game_turn.num as num
 from game,game_turn,user,referee
 where user.user_no=#para(user_no) and user.is_deleted=0 and referee.user_no=user.user_no and referee.is_deleted=0
-  and referee.game_no=game.game_no and game.is_deleted=0 and referee.turn_no=game_turn.trun_no and game_turn.is_deleted=0
+  and referee.game_no=game.game_no and game.is_deleted=0 and referee.turn_no=game_turn.turn_no and game_turn.is_deleted=0
 #end
 
 #sql("getInputMember")
