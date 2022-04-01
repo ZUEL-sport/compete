@@ -184,6 +184,17 @@ public class GameService extends BaseService<Game> {
     }
 
     /***
+     *根据game_no在game表中查找game,将now_turn_no修改为新传入的now_turn_no
+     * @param game_no
+     * @return
+     */
+    public int updateNowTurnNo(String game_no,String now_turn_no){
+        Kv cond = Kv.by("game_no",game_no).set("now_turn_no",now_turn_no);
+        SqlPara sqlPara= Db.getSqlPara("game.updateNowTurnNo",cond);
+        return Db.update(sqlPara);
+    }
+
+    /***
      * 修改成绩
      * @param user_no
      * @return

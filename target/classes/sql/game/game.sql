@@ -1,13 +1,18 @@
 #sql("listByNoProcess")
-select name from game where process_no not in (select process_no from process where process.name = #para(name) and is_deleted=0)
+select game_no,name from game where process_no not in (select process_no from process where process.name = #para(name) and is_deleted=0)
 #end
 
 #sql("listByProcess")
-select name from game where process_no in (select process_no from process where process.name = #para(name) and is_deleted=0)
+select game_no,name from game where process_no in (select process_no from process where process.name = #para(name) and is_deleted=0)
 #end
 
 #sql("getGame")
-select * from game where game_no = #para(game_no) and is_deleted=0
+select * from game
+where game_no=#para(game_no) and is_deleted=0
+#end
+
+#sql("getAllTurn")
+select turn_no,name as turn_name,place,time,num,next_turn_no from game_turn where game_no=#para(game_no) and is_deleted=0
 #end
 
 #sql("getTurn")
@@ -66,6 +71,10 @@ where grade.game_no=game.game_no and grade.turn_no=game_turn.turn_no and
 update game set process_no=#para(process_no) where game_no=#para(game_no) and is_deleted=0
 #end
 
+#sql("updateNowTurnNo")
+update game set now_turn_no=#para(now_turn_no) where game_no=#para(game_no) and is_deleted=0
+#end
+
 #sql("listGameProcess")
 select game.name as game_name,process.name as process_name from game,process where game.process_no=process.process_no and game.is_deleted=0 and process.is_deleted=0
 #end
@@ -88,4 +97,12 @@ select * from complaint where user_no = #para(user_no) and is_deleted=0
 select description,result
 from complaint
 where user_no = #para(user_no) and is_deleted=0 and state=1
+#end
+
+#sql("showSignedGame")
+select name,object,sex,turn,process_no,now_turn_no,description from game where is_deleted=0 and process_no=3
+#end
+
+#sql("getSavingMember")
+select * from enroll where is_deleted=0 and player_no=#para(playerNo) and game_no=#para(gameNo)
 #end

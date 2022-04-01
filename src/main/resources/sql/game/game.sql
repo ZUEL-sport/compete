@@ -7,7 +7,7 @@ select game_no,name from game where process_no in (select process_no from proces
 #end
 
 #sql("getGame")
-select game_no,name as game_name,type,object,sex,turn as turns,process_no,now_turn_no,description from game
+select * from game
 where game_no=#para(game_no) and is_deleted=0
 #end
 
@@ -69,6 +69,10 @@ where grade.game_no=game.game_no and grade.turn_no=game_turn.turn_no and
 
 #sql("updateGameProcess")
 update game set process_no=#para(process_no) where game_no=#para(game_no) and is_deleted=0
+#end
+
+#sql("updateNowTurnNo")
+update game set now_turn_no=#para(now_turn_no) where game_no=#para(game_no) and is_deleted=0
 #end
 
 #sql("listGameProcess")

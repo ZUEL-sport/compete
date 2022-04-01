@@ -4,12 +4,17 @@ import cn.fabrice.common.pojo.BaseResult;
 import cn.fabrice.common.pojo.DataResult;
 import cn.fabrice.jfinal.annotation.Param;
 import cn.fabrice.jfinal.annotation.ValidateParam;
+import com.alibaba.fastjson.JSON;
+import net.sf.json.JSONArray;
+
+//import com.alibaba.fastjson.JSONArray;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
+import net.sf.json.JSONObject;
 import org.common.interceptor.CorsInterceptor;
 import org.common.module.*;
 import org.user.UserController;
@@ -140,29 +145,45 @@ public class GameController extends Controller {
     /**
      * 人员晋级管理
      * 若game的now_turn_no为最后一个场次,即在game_turn表中查到的next_turn_no为0,则在成绩录入阶段后将流程置为比赛结束,而不是人员晋级,跳过该阶段
-     * 根据前端传入的choose--1表示晋级,0表示为晋级
+     * 根据前端传入的choose--1表示晋级,0表示为淘汰
      * 将晋级的人员存入下一个赛程的参赛信息表(在game_turn表中找到game的下一个赛程的turn_no)
      * 将game的now_turn_no改成下个场次的编号
      */
-    @Param(name = "game_no",required = true)
-    @Param(name = "user_no",required = true)
-    @Param(name = "choose",required = true)
+    /**
+     * jFinal提供函数getRawData()用于接收JSON数据(就不需要使用注解接收)
+     */
     public void selectPromotionPeople(){
-        Record game=gameService.getGame(getPara("game_no"));
+        //以字符串形式接收前端传来的json字符串
+        String list=getRawData();
+        //将字符串转化成json数组格式
+        JSONArray jsonArray= JSONArray.fromObject(list);
+        JSONObject jsonObject;
+        //从传来的json数组中取出game_no
+        String game_no= (String) jsonArray.getJSONObject(0).get("game_no");
+        Record game=gameService.getGame(game_no);
         //当前场次(在创建比赛的时候设置初始值为第一个场次)
         Record turn=gameService.getTurn(game.getStr("now_turn_no"));
-        if(Objects.equals(getPara("choose"), "1")){
-            Grade grade=new Grade();
-            grade.setGameNo(getPara("game_no"));
-            grade.setTurnNo(turn.getStr("next_turn_no"));
-            grade.setNo(getPara("user_no"));
-            renderJson(grade.save()?BaseResult.ok("晋级成功!"):BaseResult.fail("晋级失败!"));
+        for(int i=0;i<jsonArray.size();i++){
+            //对JSON数组中的每个对象进行遍历,晋级放入参赛表中(对应赛程改变),淘汰则不做处理
+            jsonObject=jsonArray.getJSONObject(i);
+            //如果该列对应的choose为1(晋级)
+            if(Objects.equals(jsonObject.get("choose"), 1)){
+                Grade grade=new Grade();
+                grade.setGameNo(game_no);
+                grade.setTurnNo(turn.getStr("next_turn_no"));
+                grade.setNo((String) jsonObject.get("user_no"));
+                System.out.println(jsonObject.get("user_no"));
+                System.out.println(jsonObject.get("choose"));
+                grade.save();
+            }
+        }
+        //json数组循环完毕后,修改项目信息(当前场次)
+        if(gameService.updateNowTurnNo(game_no,turn.getStr("next_turn_no"))>0){
+            renderJson(BaseResult.ok("人员晋级成功!"));
         }
         else{
-            renderJson(BaseResult.ok("已淘汰!"));
+            renderJson(BaseResult.fail("人员晋级失败!"));
         }
-        //如何以列表的形式传递接收?
-        //暂时无法实现人员晋级完成后将game中的now_turn_no进行修改...
     }
 
     /**
