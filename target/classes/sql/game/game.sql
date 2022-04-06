@@ -6,8 +6,20 @@ select game_no,name from game where process_no not in (select process_no from pr
 select game_no,name from game where process_no in (select process_no from process where process.name = #para(name) and is_deleted=0)
 #end
 
+#sql("showNeedReferee")
+select game.game_no as game_no,game.name as game_name,game_turn.turn_no as turn_no,game_turn.name as turn_name
+from game,game_turn
+where game.now_turn_no=game_turn.turn_no
+#end
+
+
 #sql("getGame")
 select * from game
+where game_no=#para(game_no) and is_deleted=0
+#end
+
+#sql("getGameDetail")
+select object,game.name=game_name,turn,information from game
 where game_no=#para(game_no) and is_deleted=0
 #end
 

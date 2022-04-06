@@ -28,6 +28,15 @@ public class GameService extends BaseService<Game> {
     }
 
     /***
+     * 查找比赛+场次
+     * @return
+     */
+    public List<Record> showNeedReferee(){
+        SqlPara sqlPara= Db.getSqlPara("game.showNeedReferee");
+        return Db.find(sqlPara);
+    }
+
+    /***
      * 查找比赛流程的名字是"name"的比赛
      * @param name 名称
      * @return 名称
@@ -56,7 +65,7 @@ public class GameService extends BaseService<Game> {
      */
     public List<Record> getGameDetail(String gameNo){
         Kv cond = Kv.by("game_no",gameNo);
-        SqlPara sqlPara = Db.getSqlPara("game.getGame", cond);
+        SqlPara sqlPara = Db.getSqlPara("game.getGameDetail", cond);
         List<Record> records = Db.find(sqlPara);
         sqlPara.clear();
         sqlPara = Db.getSqlPara("game.getAllTurn", cond);

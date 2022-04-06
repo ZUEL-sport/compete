@@ -12,10 +12,7 @@ import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import org.common.interceptor.CorsInterceptor;
-import org.common.module.Cookie;
-import org.common.module.Game;
-import org.common.module.TeamMate;
-import org.common.module.User;
+import org.common.module.*;
 import org.game.GameService;
 
 import java.math.BigInteger;
@@ -98,8 +95,15 @@ public class UserController extends Controller {
      * 显示个人信息
      * 返回前端个人信息
      */
+    @Param(name = "user_no")
     public void userDetail(){
-        Record record = userService.getUserDetail(getCookie("user_no"));
+        Record record = userService.getUserDetail(getPara("user_no"));
+        if(Objects.equals(record.getStr("sex"), "0")){
+            record.set("sex","男");
+        }
+        else{
+            record.set("sex","女");
+        }
         renderJson(DataResult.data(record));
     }
 
@@ -146,8 +150,9 @@ public class UserController extends Controller {
      * 显示所有该裁判能录入成绩的项目
      * 返回前端 该裁判能录入的所有比赛
      */
+    @Param(name = "id",required = true)
     public void showScoreInput(){
-        List<Record> records = userService.getMyScoreInput(getCookie("user_no"));
+        List<Record> records = userService.getMyScoreInput(getPara("id"));
         if(StrKit.notNull(records) && records.size() != 0){
             renderJson(DataResult.data(records));
             return;
@@ -172,13 +177,13 @@ public class UserController extends Controller {
     /**
      * 录入成绩
      */
-    @Param(name = "mate_no",required = true)
-    @Param(name = "game_no",required = true)
-    @Param(name = "turn_no",required = true)
+    @Param(name = "userNo",required = true)
+    @Param(name = "gameNo",required = true)
+    @Param(name = "turnNo",required = true)
     @Param(name = "grade",required = true)
     @Param(name = "ranking",required = true)
     public void inputScore(){
-        Record member = userService.inputScore(getPara("mate_no"), getPara("game_no"), getPara("turn_no"));
+        Record member = userService.inputScore(getPara("userNo"), getPara("gameNo"), getPara("turnNo"));
         member.set("grade", getPara("grade")).set("ranking", getPara("ranking"));
         renderJson(Db.update("grade", member) ? BaseResult.ok() : BaseResult.fail("成绩录入失败"));
     }
@@ -189,23 +194,25 @@ public class UserController extends Controller {
     public void showComplaint(){
         List<Record> records = userService.showComplaint();
         if(StrKit.notNull(records)){
+            for(int i=0;i<records.size();i++){
+                Record record= records.get(i);
+                if(Objects.equals(record.getStr("category"), "0")){
+                    record.set("category","成绩错误");
+                }
+                else if(Objects.equals(record.getStr("category"), "1"))
+                {
+                    record.set("category","举报他人");
+                }
+                else{
+                    record.set("category","其他错误");
+                }
+            }
             renderJson(DataResult.data(records));
             return;
         }
         renderJson(BaseResult.fail("目前没有未处理的申诉"));
     }
 
-    /**
-     * 显示申诉结果
-     */
-    public void showComplaintResult(){
-        List<Record> records = userService.showComplaintResult();
-        if(StrKit.notNull(records)){
-            renderJson(DataResult.data(records));
-            return;
-        }
-        renderJson(BaseResult.fail("当前没有已处理的申诉"));
-    }
 
     public void resetPassword(){
 
@@ -263,6 +270,10 @@ public class UserController extends Controller {
      * return;
      *
      * 在数据库查询时即获得所需结果显然更为简便
+     */
+
+    /**
+     * 我的项目
      */
     @Param(name = "user_no",required = true)
     public void myGame(){
@@ -385,5 +396,31 @@ public class UserController extends Controller {
         else{
             renderJson(BaseResult.fail("删除失败!"));
         }
+    }
+
+    /**
+     * 查看申诉详情
+     */
+    @Param(name = "id", required = true)
+    public void showComplaintDetail() {
+        Record record = Db.findById("complaint", getPara("id"));
+        renderJson(DataResult.data(record));
+    }
+
+    /**
+     * 提交申诉
+     */
+    @Param(name = "kind", required = true)
+    @Param(name = "id", required = true)
+    @Param(name = "AppData", required = true)
+    public void commitComplaint() {
+        Complaint complaint = new Complaint();
+        complaint.setUserNo(getPara("id"));
+        complaint.setDescription(getPara("AppData"));
+        complaint.setState(0);
+        complaint.setComplaintNo("1");
+        complaint.setCategory(Integer.valueOf(getPara("kind")));
+        complaint.save();
+        renderJson(BaseResult.ok("提交成功！"));
     }
 }

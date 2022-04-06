@@ -42,6 +42,7 @@ public class GameController extends Controller {
             renderJson(BaseResult.fail("当前暂无比赛"));
         }
         else{
+            System.out.println(list);
             renderJson(DataResult.data(list));
         }
     }
@@ -293,9 +294,25 @@ public class GameController extends Controller {
         return;
     }
 
+    public void showNeedReferee(){
+        List<Record> list= gameService.showNeedReferee();
+        if(list.isEmpty()){
+            renderJson(BaseResult.fail("当前暂无比赛"));
+        }
+        else{
+            System.out.println(list);
+            renderJson(DataResult.data(list));
+        }
+
+    }
+
+
     /***
      * 为各个赛程分配裁判,存入裁判表
      */
+    @Param(name = "user_no", required = true)
+    @Param(name = "turn_no", required = true)
+    @Param(name = "game_no", required = true)
     public void allotReferee(){
         Referee referee = new Referee();
         referee.setGameNo(getPara("game_no"));

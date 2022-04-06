@@ -23,7 +23,7 @@ update team set is_deleted=1 where team_no=#para(team_no) and is_deleted=0
 #end
 
 #sql("getUserDetailByNo")
-select user.user_no as user_no,user.name as user_name,school.name as school_name,user.phone as phone,user.sex as sex
+select user.user_no as user_no,user.name as user_name,school.name as school_name,user.phone as phone,user.sex as sex,user.password as password
 from user,school where user.user_no = #para(user_no) and user.is_deleted=0 and user.school_no = school.school_no and school.is_deleted=0
 #end
 
@@ -40,23 +40,24 @@ where user.user_no = team_mate.mate_no and user.is_deleted=0 and team_mate.is_de
 #end
 
 #sql("getMyScoreInput")
-select game.game_no as game_no,game.name as game_name,game_turn.name as turn_name,game_turn.num as num
-from game,game_turn,user,referee
-where user.user_no=#para(user_no) and user.is_deleted=0 and referee.user_no=user.user_no and referee.is_deleted=0
-  and referee.game_no=game.game_no and game.is_deleted=0 and referee.turn_no=game_turn.turn_no and game_turn.is_deleted=0
-#end
+select game.game_no as game_no,game_turn.turn_no as turn_no,game.name as game_name,game_turn.name as turn_name
+from game,game_turn,referee
+where referee.user_no="004"
+  and referee.game_no=game.game_no and referee.turn_no=game.now_turn_no and referee.turn_no=game_turn.turn_no and game.process_no="05"
+    #end
 
 #sql("getInputMember")
 select * from grade where game_no=#para(gameNo) and turn_no=#para(turnNo) and no=#para(mateNo)
 #end
 
 #sql("showInputMembers")
-select user.name as user_name,user.user_no as user_no,grade.ranking as ranking from user,grade
-where user.is_deleted=0 and user.user_no=grade.no and grade.is_deleted=0 and grade.game_no=#para(gameNo) and grade.turn_no=#para(turnNo)
+select user.name as user_name,user.user_no as user_no,game.name as game_name,game_turn.name as turn_name,grade.grade as grade,grade.ranking as ranking
+from user,grade,game,game_turn
+where user.user_no=grade.no and grade.game_no=game.game_no and grade.turn_no=game_turn.turn_no and grade.game_no="01" and grade.turn_no="01"
 #end
 
 #sql("showComplaint")
-select complaint_no,category,user_no,description,state from complaint where is_deleted=0 and state=0
+select complaint.id as id,complaint.created_time as created_time,complaint_no,category,user.name as name,description from complaint,user where user.user_no=complaint.user_no and state=0
 #end
 
 #sql("showComplaintResult")
